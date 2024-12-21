@@ -1,0 +1,48 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 3
+
+Resources:
+  SummafyFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: summafy
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      MemorySize: 512
+      Timeout: 30
+      Architectures:
+        - x86_64
+      Policies:
+        - S3ReadPolicy:
+            BucketName: superumi-summafy-123
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - s3:GetObject
+                - s3:ListBucket
+                - sns:Publish
+              Resource:
+                - arn:aws:sns:us-east-1:120569638976:summafy-summary:c2a6ef6d-840c-4eb3-93b1-6a0b497979e2
+                - arn:aws:s3:::superumi-summafy-123/*
+                
+# Gives permisiion to S3 bucket to invoke the lambda function created in the stack
+  S3InvokeLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref SummafyFunction
+      Principal: s3.amazonaws.com
+      SourceArn: arn:aws:s3:::superumi-summafy-123
+      SourceAccount: !Ref AWS::AccountId
+Outputs:
+  SummafyFunction:
+    Description: Summafy Function ARN
+    Value: !GetAtt SummafyFunction.Arn
+  SummafyFunctionIamRole:
+    Description: Implicit IAM Role created for Summafy Function
+    Value: !GetAtt SummafyFunctionRole.Arn
