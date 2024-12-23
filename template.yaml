@@ -6,11 +6,14 @@ Globals:
     Timeout: 3
 
 Resources:
-  SummafyFunction:
+  #
+  # Function 1 - Read from S3 bucket and process the file
+  #
+  SummafyReadS3Function:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: summafy
-      Handler: app.lambda_handler
+      CodeUri: readS3
+      Handler: readS3.lambda_handler
       Runtime: python3.12
       MemorySize: 512
       Timeout: 30
@@ -25,24 +28,70 @@ Resources:
               Action:
                 - s3:GetObject
                 - s3:ListBucket
-                - sns:Publish
               Resource:
-                - arn:aws:sns:us-east-1:120569638976:summafy-summary:c2a6ef6d-840c-4eb3-93b1-6a0b497979e2
                 - arn:aws:s3:::superumi-summafy-123/*
                 
-# Gives permisiion to S3 bucket to invoke the lambda function created in the stack
+  # Gives permision to S3 bucket to invoke the lambda function created in the stack
   S3InvokeLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref SummafyFunction
+      FunctionName: !Ref SummafyReadS3Function
       Principal: s3.amazonaws.com
       SourceArn: arn:aws:s3:::superumi-summafy-123
       SourceAccount: !Ref AWS::AccountId
+  
+  #
+  # Function 2 - Make a call to OpenAI API to create a summary
+  # 
+  SummafySummarizeFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: summarize
+      Handler: summarize.lambda_handler
+      Runtime: python3.12
+      MemorySize: 512
+      Timeout: 30
+      Architectures:
+        - x86_64
+      Environment:
+        Variables:
+          OPENAI_API_KEY: !Sub arn:aws:ssm:us-east-1:120569638976:parameter/openai/apikey
+          OPENAI_API_URL: !Sub arn:aws:ssm:us-east-1:120569638976:parameter/openai/apiurl
+  #
+  # Function 3 - Write the summary to RDS
+  #
+  SummafyWriteDbFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: write_db
+      Handler: write_db.lambda_handler
+      Runtime: python3.12
+      MemorySize: 512
+      Timeout: 30
+      Architectures:
+        - x86_64
+      Policies:
+        - Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action:
+                - rds:*
+              Resource:
+                - arn:aws:rds:us-east-1:120569638976:db:summafy-database 
+      Environment:
+        Variables:
+          RDS_DB_URL: !Sub arn:aws:ssm:us-east-1:120569638976:parameter/rds/dburl
+          RDS_DB_USER: !Sub arn:aws:ssm:us-east-1:120569638976:parameter/rds/dbuser 
+          RDS_DB_PASSWORD: !Sub arn:aws:ssm:us-east-1:120569638976:parameter/rds/dbpassword  
+  
 Outputs:
-  SummafyFunction:
-    Description: Summafy Function ARN
-    Value: !GetAtt SummafyFunction.Arn
-  SummafyFunctionIamRole:
-    Description: Implicit IAM Role created for Summafy Function
-    Value: !GetAtt SummafyFunctionRole.Arn
+  SummafyReadS3Function:
+    Description: Read S3 Function ARN
+    Value: !GetAtt SummafyReadS3Function.Arn
+  SummafySummarizeFunction:
+    Description: Summarize Function ARN 
+    Value: !GetAtt SummafySummarizeFunction.Arn
+  SummafyWriteDbFunction:
+    Description: Write DB Function ARN
+    Value: !GetAtt SummafyWriteDbFunction.Arn
