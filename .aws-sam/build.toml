@@ -5,7 +5,7 @@ codeuri = "/home/emmaahmads/workspace/summafy_repos/lambda-sam-app/readS3"
 runtime = "python3.12"
 architecture = "x86_64"
 handler = "readS3.lambda_handler"
-manifest_hash = "7cdf3c8e47a6d5f9e92bdca6214fa352"
+manifest_hash = "6d4fde94829d1e911658af599830e8d6"
 packagetype = "Zip"
 functions = ["SummafyReadS3Function"]
 
@@ -23,7 +23,7 @@ codeuri = "/home/emmaahmads/workspace/summafy_repos/lambda-sam-app/write_db"
 runtime = "python3.12"
 architecture = "x86_64"
 handler = "write_db.lambda_handler"
-manifest_hash = ""
+manifest_hash = "6fa2c8df1f6d8788a97358ff45cd5a2b"
 packagetype = "Zip"
 functions = ["SummafyWriteDbFunction"]
 

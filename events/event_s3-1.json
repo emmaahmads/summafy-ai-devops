@@ -1,0 +1,25 @@
+{
+  "version": "0",
+  "id": "afa461ab-f269-c449-51ce-8e8bb876412b",
+  "detail-type": "Object Created",
+  "source": "aws.s3",
+  "account": "120569638976",
+  "time": "2024-12-24T07:10:01Z",
+  "region": "us-east-1",
+  "resources": [
+    "arn:aws:s3:::superumi-summafy-123"
+  ],
+  "detail": {
+    "version": "0",
+    "bucket": {
+      "name": "superumi-summafy-123"
+    },
+    "object": {
+      "key": "ecr-apprunner-exercise.pdf"
+    },
+    "request-id": "GSXKNTV6G8YZE8CE",
+    "requester": "120569638976",
+    "source-ip-address": "180.75.239.243",
+    "reason": "CompleteMultipartUpload"
+  }
+}
