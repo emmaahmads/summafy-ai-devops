@@ -11,7 +11,7 @@ s3 = boto3.client('s3')
 sns = boto3.client('sns')
 
 # OpenAI API settings
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = ""
 OPENAI_API_URL = "https://api.openai.com/v1/completions"
 
 def pdf_to_text(pdf_file):
