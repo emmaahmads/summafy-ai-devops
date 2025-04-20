@@ -1,0 +1,5 @@
+stateDiagram-v2
+    [*] --> ReadS3Lambda: S3 File Upload Event
+    ReadS3Lambda --> SummarizeLambda: Extracted Text
+    SummarizeLambda --> WriteDbLambda: GenAI Summary
+    WriteDbLambda --> [*]: Store in RDS Database
