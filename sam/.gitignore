@@ -1,9 +1,9 @@
-
-# Created by https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
+    `1# Created by https://www.gitignore.io/api/osx,linux,python,windows,pycharm,visualstudiocode
 
 ### Linux ###
 *~
 
+UPGRADE_PLAN.md
 # temporary files which can be created if a process still has a handle open of a deleted file
 .fuse_hidden*
 
