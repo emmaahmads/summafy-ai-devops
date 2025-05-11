@@ -1,20 +1,12 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
-Globals:
-  Function:
-    Timeout: 3
-
 Resources:
-  #
-  # Function 1 - Read from S3 bucket and process the file
-  #
-  SummafyReadS3Function:
+  SummafyReadS3ContainerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: readS3
-      Handler: readS3.lambda_handler
-      Runtime: python3.12
+      PackageType: Image
+      ImageUri: 120569638976.dkr.ecr.us-east-2.amazonaws.com/summafy-step/ingestor:379078b1dbdd4cce94df6189fc0958bd8d5f717c
       MemorySize: 512
       Timeout: 30
       Architectures:
@@ -30,7 +22,12 @@ Resources:
                 - s3:ListBucket
               Resource:
                 - arn:aws:s3:::superumi-summafy-123/*
-                
+
+Outputs:
+  SummafyReadS3ContainerFunction:
+    Description: Read S3 Container Function ARN
+    Value: !GetAtt SummafyReadS3ContainerFunction.Arn
+
   # Gives permision to S3 bucket to invoke the lambda function created in the stack
   S3InvokeLambdaPermission:
     Type: AWS::Lambda::Permission
@@ -42,62 +39,10 @@ Resources:
       SourceAccount: !Ref AWS::AccountId
   
   #
-  # Function 2 - Make a call to OpenAI API to create a summary
-  # 
-  SummafySummarizeFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: summarize
-      Handler: summarize.lambda_handler
-      Runtime: python3.12
-      MemorySize: 512
-      Timeout: 30
-      Architectures:
-        - x86_64
-      Environment:
-        Variables:
-          OPENAI_API_KEY: !Sub '{{resolve:ssm:arn:aws:ssm:us-east-1:120569638976:parameter/openai/apikey}}'
-          OPENAI_API_URL: !Sub '{{resolve:ssm:arn:aws:ssm:us-east-1:120569638976:parameter/openai/apiurl}}'
-  #
-  # Function 3 - Write the summary to RDS
-  #
-  SummafyWriteDbFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      CodeUri: write_db
-      Handler: write_db.lambda_handler
-      Runtime: python3.12
-      MemorySize: 512
-      Timeout: 30
-      Architectures:
-        - x86_64
-      Policies:
-        - Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action:
-                - rds:*
-              Resource:
-                - arn:aws:rds:us-east-1:120569638976:db:summafy-database 
-      Environment:
-        Variables:
-          RDS_DB_URL: !Sub '{{resolve:ssm:arn:aws:ssm:us-east-1:120569638976:parameter/rds/dburl}}'
-          RDS_DB_USER: !Sub '{{resolve:ssm:arn:aws:ssm:us-east-1:120569638976:parameter/rds/dbuser}}'
-          RDS_DB_PASSWORD: !Sub '{{resolve:ssm:arn:aws:ssm:us-east-1:120569638976:parameter/rds/dbpassword}}'
-      VpcConfig:
-        SecurityGroupIds:
-          - sg-01f87dd86148bc0b6  # Replace with your security group ID
-        SubnetIds:
-          - subnet-06835470253f454b6  # Replace with your subnet ID
-          - subnet-0847e70eaa79fd46b  # Replace with another subnet ID if needed 
+
   
 Outputs:
-  SummafyReadS3Function:
-    Description: Read S3 Function ARN
-    Value: !GetAtt SummafyReadS3Function.Arn
-  SummafySummarizeFunction:
-    Description: Summarize Function ARN 
-    Value: !GetAtt SummafySummarizeFunction.Arn
-  SummafyWriteDbFunction:
-    Description: Write DB Function ARN
-    Value: !GetAtt SummafyWriteDbFunction.Arn
+  SummafyReadS3ContainerFunction:
+    Description: Read S3 Container Function ARN
+    Value: !GetAtt SummafyReadS3ContainerFunction.Arn
+

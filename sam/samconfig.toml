@@ -7,7 +7,7 @@ stack_name = "summafy-lambdas"
 [default.build.parameters]
 cached = true
 parallel = true
-template_file = "/home/emmaahmads/workspace/summafy_repos/lambda-sam-app/template.yaml"
+template_file = "template.yaml"
 
 [default.validate.parameters]
 lint = true
@@ -23,7 +23,7 @@ resolve_s3 = true
 
 [default.sync.parameters]
 watch = true
-template_file = "/home/emmaahmads/workspace/summafy_repos/lambda-sam-app/template.yaml"
+template_file = "template.yaml"
 s3_bucket = "aws-sam-cli-managed-default-samclisourcebucket-cdrzmdedc1gm"
 dependency_layer = false
 
@@ -32,3 +32,6 @@ warm_containers = "EAGER"
 
 [default.local_start_lambda.parameters]
 warm_containers = "EAGER"
+
+[default.deploy.parameters]
+no_fail_on_empty_changeset = true
