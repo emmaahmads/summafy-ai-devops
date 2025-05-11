@@ -1,4 +1,7 @@
 name: Deploy SAM App
+permissions:
+  id-token: write
+  contents: read
 
 on:
   push:
