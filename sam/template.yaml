@@ -33,7 +33,7 @@ Outputs:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref SummafyReadS3Function
+      FunctionName: !Ref SummafyReadS3ContainerFunction
       Principal: s3.amazonaws.com
       SourceArn: arn:aws:s3:::superumi-summafy-123
       SourceAccount: !Ref AWS::AccountId

@@ -17,6 +17,8 @@ capabilities = [ "CAPABILITY_IAM", "CAPABILITY_NAMED_IAM" ]
 confirm_changeset = false
 resolve_s3 = true
 stack_name = "summafy-lambdas"
+no_fail_on_empty_changeset = true
+image_repositories = ["SummafyReadS3ContainerFunction=120569638976.dkr.ecr.us-east-2.amazonaws.com/summafy-step/ingestor"]
 
 [default.package.parameters]
 resolve_s3 = true
@@ -33,5 +35,4 @@ warm_containers = "EAGER"
 [default.local_start_lambda.parameters]
 warm_containers = "EAGER"
 
-[default.deploy.parameters]
-no_fail_on_empty_changeset = true
+
