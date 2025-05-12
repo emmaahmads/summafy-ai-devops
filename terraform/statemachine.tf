@@ -4,7 +4,7 @@ variable "bucket_name" {
 }
 
 data "aws_s3_bucket" "source_bucket" {
-  bucket = var.bucket_name
+  bucket = "superumi-summafy-123"
 }
 
 data "aws_cloudformation_stack" "functions" {

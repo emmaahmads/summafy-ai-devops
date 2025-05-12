@@ -38,12 +38,14 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
-      - name: Create tfvars file with bucket name from secret
-        run: echo "bucket_name = \"${{ secrets.DOC_BUCKET_NAME }}\"" > override.tfvars
+      # - name: Create tfvars file with bucket name from secret
+        # run: echo "bucket_name = \"${{ secrets.DOC_BUCKET_NAME }}\"" > override.tfvars
 
       - name: Terraform Plan
-        run: terraform plan -var-file=override.tfvars
+        # run: terraform plan -var-file=override.tfvars
+        run: terraform plan
 
       - name: Terraform Apply
         # if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-        run: terraform apply -auto-approve -var-file=override.tfvars
+        # run: terraform apply -auto-approve -var-file=override.tfvars
+        run: terraform apply -auto-approve
