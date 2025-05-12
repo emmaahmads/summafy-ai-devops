@@ -11,7 +11,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      ImageUri: 120569638976.dkr.ecr.us-east-2.amazonaws.com/summafy-step/ingestor:379078b1dbdd4cce94df6189fc0958bd8d5f717c
+      ImageUri: 120569638976.dkr.ecr.us-east-1.amazonaws.com/summafy-repo@sha256:5ed783c6239d066c7d445b80e34b61c4e30543944ecd9ab0c2b9ccac82519b9f #todo
       MemorySize: 512
       Timeout: 30
       Architectures:
@@ -28,12 +28,6 @@ Resources:
               Resource:
                 - !Sub arn:aws:s3:::${TargetBucketName}/*
 
-Outputs:
-  SummafyReadS3ContainerFunction:
-    Description: Read S3 Container Function ARN
-    Value: !GetAtt SummafyReadS3ContainerFunction.Arn
-
-  # Gives permission to S3 bucket to invoke the lambda function created in the stack
   S3InvokeLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
@@ -42,3 +36,8 @@ Outputs:
       Principal: s3.amazonaws.com
       SourceArn: !Sub arn:aws:s3:::${TargetBucketName}
       SourceAccount: !Ref AWS::AccountId
+
+Outputs:
+  SummafyReadS3ContainerFunction:
+    Description: Read S3 Container Function ARN
+    Value: !GetAtt SummafyReadS3ContainerFunction.Arn

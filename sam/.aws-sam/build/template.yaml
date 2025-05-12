@@ -1,0 +1,46 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Parameters:
+  TargetBucketName:
+    Type: String
+    Description: The S3 bucket name that the Lambda can access
+Resources:
+  SummafyReadS3ContainerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      PackageType: Image
+      ImageUri: 120569638976.dkr.ecr.us-east-1.amazonaws.com/summafy-repo@sha256:5ed783c6239d066c7d445b80e34b61c4e30543944ecd9ab0c2b9ccac82519b9f
+      MemorySize: 512
+      Timeout: 30
+      Architectures:
+      - x86_64
+      Policies:
+      - S3ReadPolicy:
+          BucketName:
+            Ref: TargetBucketName
+      - Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - s3:GetObject
+          - s3:ListBucket
+          Resource:
+          - Fn::Sub: arn:aws:s3:::${TargetBucketName}/*
+  S3InvokeLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName:
+        Ref: SummafyReadS3ContainerFunction
+      Principal: s3.amazonaws.com
+      SourceArn:
+        Fn::Sub: arn:aws:s3:::${TargetBucketName}
+      SourceAccount:
+        Ref: AWS::AccountId
+Outputs:
+  SummafyReadS3ContainerFunction:
+    Description: Read S3 Container Function ARN
+    Value:
+      Fn::GetAtt:
+      - SummafyReadS3ContainerFunction
+      - Arn

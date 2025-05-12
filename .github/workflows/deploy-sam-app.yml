@@ -38,4 +38,13 @@ jobs:
           TARGET_BUCKET_NAME: summafy-superumi123
         run: |
           sam build
-          sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --resolve-image-repos --parameter-overrides TargetBucketName=$TARGET_BUCKET_NAME
+          sam deploy \
+            --stack-name summafy-lambdas \
+            --region us-east-1 \
+            --s3-bucket summafy-artifacts-70819-jalancengal-xx \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --resolve-image-repos \
+            --parameter-overrides TargetBucketName=summafy-superumi123
+
