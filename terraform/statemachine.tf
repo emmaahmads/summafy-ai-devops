@@ -1,5 +1,10 @@
+variable "bucket_name" {
+  description = "The name of the S3 bucket to use as the source bucket."
+  type        = string
+}
+
 data "aws_s3_bucket" "source_bucket" {
-  bucket = "superumi-summafy-123"
+  bucket = var.bucket_name
 }
 
 data "aws_cloudformation_stack" "functions" {

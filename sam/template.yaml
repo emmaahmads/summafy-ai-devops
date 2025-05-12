@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
-  TargetBucketName:
+  DocBucketName:
     Type: String
     Description: "The S3 bucket name that the Lambda can access"
 
@@ -18,7 +18,7 @@ Resources:
         - x86_64
       Policies:
         - S3ReadPolicy:
-            BucketName: !Ref TargetBucketName
+            BucketName: !Ref DocBucketName
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -26,7 +26,7 @@ Resources:
                 - s3:GetObject
                 - s3:ListBucket
               Resource:
-                - !Sub arn:aws:s3:::${TargetBucketName}/*
+                - !Sub arn:aws:s3:::${DocBucketName}/*
 
   S3InvokeLambdaPermission:
     Type: AWS::Lambda::Permission
@@ -34,7 +34,7 @@ Resources:
       Action: lambda:InvokeFunction
       FunctionName: !Ref SummafyReadS3ContainerFunction
       Principal: s3.amazonaws.com
-      SourceArn: !Sub arn:aws:s3:::${TargetBucketName}
+      SourceArn: !Sub arn:aws:s3:::${DocBucketName}
       SourceAccount: !Ref AWS::AccountId
 
 Outputs:
