@@ -35,4 +35,4 @@ jobs:
         working-directory: sam
         run: |
           sam build
-          sam deploy --no-confirm-changeset --no-fail-on-empty-changeset
+          sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --resolve-image-repos
