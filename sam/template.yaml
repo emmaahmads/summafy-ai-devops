@@ -2,7 +2,7 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
 Parameters:
-  TargetBucketName:
+  DocBucketName:
     Type: String
     Description: "The S3 bucket name that the Lambda can access"
 
@@ -11,14 +11,14 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Image
-      ImageUri: 120569638976.dkr.ecr.us-east-2.amazonaws.com/summafy-step/ingestor:379078b1dbdd4cce94df6189fc0958bd8d5f717c
+      ImageUri: 120569638976.dkr.ecr.us-east-1.amazonaws.com/summafy-repo@sha256:5ed783c6239d066c7d445b80e34b61c4e30543944ecd9ab0c2b9ccac82519b9f #todo
       MemorySize: 512
       Timeout: 30
       Architectures:
         - x86_64
       Policies:
         - S3ReadPolicy:
-            BucketName: !Ref TargetBucketName
+            BucketName: !Ref DocBucketName
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -26,19 +26,18 @@ Resources:
                 - s3:GetObject
                 - s3:ListBucket
               Resource:
-                - !Sub arn:aws:s3:::${TargetBucketName}/*
+                - !Sub arn:aws:s3:::${DocBucketName}/*
 
-Outputs:
-  SummafyReadS3ContainerFunction:
-    Description: Read S3 Container Function ARN
-    Value: !GetAtt SummafyReadS3ContainerFunction.Arn
-
-  # Gives permission to S3 bucket to invoke the lambda function created in the stack
   S3InvokeLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref SummafyReadS3ContainerFunction
       Principal: s3.amazonaws.com
-      SourceArn: !Sub arn:aws:s3:::${TargetBucketName}
+      SourceArn: !Sub arn:aws:s3:::${DocBucketName}
       SourceAccount: !Ref AWS::AccountId
+
+Outputs:
+  SummafyReadS3ContainerFunction:
+    Description: Read S3 Container Function ARN
+    Value: !GetAtt SummafyReadS3ContainerFunction.Arn
