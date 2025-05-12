@@ -1,6 +1,11 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 
+Parameters:
+  TargetBucketName:
+    Type: String
+    Description: "The S3 bucket name that the Lambda can access"
+
 Resources:
   SummafyReadS3ContainerFunction:
     Type: AWS::Serverless::Function
@@ -13,7 +18,7 @@ Resources:
         - x86_64
       Policies:
         - S3ReadPolicy:
-            BucketName: superumi-summafy-123
+            BucketName: !Ref TargetBucketName
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -21,28 +26,19 @@ Resources:
                 - s3:GetObject
                 - s3:ListBucket
               Resource:
-                - arn:aws:s3:::superumi-summafy-123/*
+                - !Sub arn:aws:s3:::${TargetBucketName}/*
 
 Outputs:
   SummafyReadS3ContainerFunction:
     Description: Read S3 Container Function ARN
     Value: !GetAtt SummafyReadS3ContainerFunction.Arn
 
-  # Gives permision to S3 bucket to invoke the lambda function created in the stack
+  # Gives permission to S3 bucket to invoke the lambda function created in the stack
   S3InvokeLambdaPermission:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
       FunctionName: !Ref SummafyReadS3ContainerFunction
       Principal: s3.amazonaws.com
-      SourceArn: arn:aws:s3:::superumi-summafy-123
+      SourceArn: !Sub arn:aws:s3:::${TargetBucketName}
       SourceAccount: !Ref AWS::AccountId
-  
-  #
-
-  
-Outputs:
-  SummafyReadS3ContainerFunction:
-    Description: Read S3 Container Function ARN
-    Value: !GetAtt SummafyReadS3ContainerFunction.Arn
-
