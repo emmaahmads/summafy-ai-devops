@@ -35,7 +35,7 @@ jobs:
         working-directory: sam
         env:
           # TARGET_BUCKET_NAME: ${{ secrets.ARTIFACT_BUCKET_NAME }}
-          TARGET_BUCKET_NAME: summafy-artifacts-70819-jalancengal-xx
+          TARGET_BUCKET_NAME: summafy-superumi123
         run: |
           sam build
           sam deploy --no-confirm-changeset --no-fail-on-empty-changeset --resolve-image-repos --parameter-overrides TargetBucketName=$TARGET_BUCKET_NAME
