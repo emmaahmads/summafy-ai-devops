@@ -8,7 +8,7 @@ data "aws_cloudformation_stack" "functions" {
 
 resource "aws_s3_bucket_notification" "bucket_notification" {
   bucket = data.aws_s3_bucket.source_bucket.id
-  eventbridge = true
+  # eventbridge = true
 }
 
 resource "aws_sfn_state_machine" "state_machine" {
@@ -17,23 +17,13 @@ resource "aws_sfn_state_machine" "state_machine" {
 
   definition = jsonencode({
     Comment = "The state machines of the pdf processing"
-    StartAt = "ReadPdf"
+    StartAt = "Ingestor"
     States = {
-      ReadPdf = {
+      Ingestor = {
         Type       = "Task"
-        Resource   = data.aws_cloudformation_stack.functions.outputs["SummafyReadS3Function"]
-        Next = "Summarize"
-      },
-      Summarize = {
-        Type       = "Task"
-        Resource   = data.aws_cloudformation_stack.functions.outputs["SummafySummarizeFunction"]
-        Next = "WriteDb"
-      },
-      WriteDb = {
-        Type       = "Task"
-        Resource   = data.aws_cloudformation_stack.functions.outputs["SummafyWriteDbFunction"]
+        Resource   = data.aws_cloudformation_stack.functions.outputs["SummafyReadS3ContainerFunction"]
         End = true
-      }
+      },
     }
   })
 }
@@ -53,11 +43,11 @@ resource "aws_cloudwatch_event_rule" "s3_event_rule" {
 }
 
 // specify a target for a cw event
-resource "aws_cloudwatch_event_target" "start_sm" {
-  rule       = aws_cloudwatch_event_rule.s3_event_rule.name
-  arn        = aws_sfn_state_machine.state_machine.arn
-  role_arn   = aws_iam_role.cloudwatch_event_role.arn
-}
+# resource "aws_cloudwatch_event_target" "start_sm" {
+#   rule       = aws_cloudwatch_event_rule.s3_event_rule.name
+#   arn        = aws_sfn_state_machine.state_machine.arn
+#   role_arn   = aws_iam_role.cloudwatch_event_role.arn
+# }
 
 // allows StepFunction to invoke Lambda functions
 
