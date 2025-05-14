@@ -33,19 +33,19 @@ resource "aws_sfn_state_machine" "state_machine" {
   })
 }
 
-resource "aws_cloudwatch_event_rule" "s3_event_rule" {
-  name        = "S3EventRule"
-  description = "Rule to trigger Step Function on S3 create event"
-  event_pattern = jsonencode({
-    source = ["aws.s3"]
-    detail-type = ["Object Created"]
-    detail = {
-      bucket = {
-        name = [data.aws_s3_bucket.source_bucket.bucket]
-      }
-    }
-  })
-}
+# resource "aws_cloudwatch_event_rule" "s3_event_rule" {
+#   name        = "S3EventRule"
+#   description = "Rule to trigger Step Function on S3 create event"
+#   event_pattern = jsonencode({
+#     source = ["aws.s3"]
+#     detail-type = ["Object Created"]
+#     detail = {
+#       bucket = {
+#         name = [data.aws_s3_bucket.source_bucket.bucket]
+#       }
+#     }
+#   })
+# }
 
 // specify a target for a cw event
 # resource "aws_cloudwatch_event_target" "start_sm" {
