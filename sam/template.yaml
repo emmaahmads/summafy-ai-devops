@@ -4,17 +4,16 @@ Transform: AWS::Serverless-2016-10-31
 Parameters:
   DocBucketName:
     Type: String
-    Description: "The S3 bucket name that the Lambda can access"
+    Description: "The name of the existing S3 bucket that triggers the Lambda"
   ZipBucketName:
     Type: String
-    Description: "The S3 bucket name that the Lambda zip file is stored in"
+    Description: "The S3 bucket name where the Lambda zip file is stored"
 
 Resources:
-
   SummafyIngestorFunction:
-    Name: "summafy-ingestor"
     Type: AWS::Serverless::Function
     Properties:
+      FunctionName: "summafy-ingestor"
       PackageType: Zip
       CodeUri:
         Bucket: !Ref ZipBucketName
@@ -26,8 +25,6 @@ Resources:
       Layers:
         - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-python-amd64-ver-1-21-0:1
       Policies:
-        - S3ReadPolicy:
-            BucketName: !Ref DocBucketName
         - Version: '2012-10-17'
           Statement:
             - Effect: Allow
@@ -35,16 +32,8 @@ Resources:
                 - s3:GetObject
                 - s3:ListBucket
               Resource:
-                - !Sub arn:aws:s3:::${DocBucketName}/*
-
-  S3InvokeLambdaPermission:
-    Type: AWS::Lambda::Permission
-    Properties:
-      Action: lambda:InvokeFunction
-      FunctionName: !Ref SummafyIngestorFunction
-      Principal: s3.amazonaws.com
-      SourceArn: !Sub arn:aws:s3:::${DocBucketName}
-      SourceAccount: !Ref AWS::AccountId
+                - !Join [ "", [ "arn:aws:s3:::", !Ref DocBucketName ] ]
+                - !Join [ "", [ "arn:aws:s3:::", !Ref DocBucketName, "/*" ] ]
 
 Outputs:
   SummafyIngestorFunction:

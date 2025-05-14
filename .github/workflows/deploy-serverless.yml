@@ -36,18 +36,15 @@ jobs:
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           DOC_BUCKET_NAME: ${{ secrets.DOC_BUCKET_NAME }}
-          ARTIFACT_BUCKET_NAME: ${{ secrets.ARTIFACT_BUCKET_NAME }}
           ZIP_BUCKET_NAME: ${{ secrets.ZIP_BUCKET_NAME }}
         run: |
           sam build
           sam deploy \
             --stack-name summafy-lambdas \
             --region $AWS_REGION \
-            --s3-bucket $ARTIFACT_BUCKET_NAME \
             --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
-            --resolve-image-repos \
             --parameter-overrides DocBucketName=${DOC_BUCKET_NAME} ZipBucketName=${ZIP_BUCKET_NAME}
 
   terraform:
