@@ -17,7 +17,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 }
 
 resource "aws_sfn_state_machine" "state_machine" {
-  name     = "PdfProcessingStateMachine"
+  name     = "IngestorStateMachine"
   role_arn = "arn:aws:iam::120569638976:role/StepFunctionExecutionRole"
 
   definition = jsonencode({
@@ -26,7 +26,7 @@ resource "aws_sfn_state_machine" "state_machine" {
     States = {
       Ingestor = {
         Type       = "Task"
-        Resource   = data.aws_cloudformation_stack.functions.outputs["SummafyReadS3ContainerFunction"]
+        Resource   = data.aws_cloudformation_stack.functions.outputs["SummafyIngestorFunction"]
         End = true
       },
     }

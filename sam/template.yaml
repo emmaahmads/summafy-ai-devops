@@ -11,7 +11,8 @@ Parameters:
 
 Resources:
 
-  SummafyReadS3ContainerFunction:
+  SummafyIngestorFunction:
+    Name: "summafy-ingestor"
     Type: AWS::Serverless::Function
     Properties:
       PackageType: Zip
@@ -40,12 +41,12 @@ Resources:
     Type: AWS::Lambda::Permission
     Properties:
       Action: lambda:InvokeFunction
-      FunctionName: !Ref SummafyReadS3ContainerFunction
+      FunctionName: !Ref SummafyIngestorFunction
       Principal: s3.amazonaws.com
       SourceArn: !Sub arn:aws:s3:::${DocBucketName}
       SourceAccount: !Ref AWS::AccountId
 
 Outputs:
-  SummafyReadS3ContainerFunction:
-    Description: Read S3 Container Function ARN
-    Value: !GetAtt SummafyReadS3ContainerFunction.Arn
+  SummafyIngestorFunction:
+    Description: Ingestor Function ARN
+    Value: !GetAtt SummafyIngestorFunction.Arn
