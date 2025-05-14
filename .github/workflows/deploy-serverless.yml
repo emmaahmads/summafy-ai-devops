@@ -1,0 +1,82 @@
+name: Deploy Serverless Application
+permissions:
+  id-token: write
+  contents: read
+
+on:
+  push:
+    branches:
+      - main
+    # paths:
+    #   - 'sam/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install AWS SAM CLI
+        uses: aws-actions/setup-sam@v2
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Deploy SAM application
+        working-directory: sam
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          DOC_BUCKET_NAME: ${{ secrets.DOC_BUCKET_NAME }}
+          ARTIFACT_BUCKET_NAME: ${{ secrets.ARTIFACT_BUCKET_NAME }}
+          ZIP_BUCKET_NAME: ${{ secrets.ZIP_BUCKET_NAME }}
+        run: |
+          sam build
+          sam deploy \
+            --stack-name summafy-lambdas \
+            --region $AWS_REGION \
+            --s3-bucket $ARTIFACT_BUCKET_NAME \
+            --capabilities CAPABILITY_IAM CAPABILITY_NAMED_IAM \
+            --no-confirm-changeset \
+            --no-fail-on-empty-changeset \
+            --resolve-image-repos \
+            --parameter-overrides DocBucketName=${DOC_BUCKET_NAME} ZipBucketName=${ZIP_BUCKET_NAME}
+
+  terraform:
+    name: 'Terraform Apply'
+    runs-on: ubuntu-latest
+    needs: deploy
+    defaults:
+      run:
+        working-directory: ./terraform
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.7.5
+
+      - name: Configure AWS credentials via OIDC
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve
