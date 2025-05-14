@@ -18,7 +18,7 @@ resource "aws_s3_bucket_notification" "bucket_notification" {
 
 resource "aws_sfn_state_machine" "state_machine" {
   name     = "PdfProcessingStateMachine"
-  role_arn = aws_iam_role.step_function_role.arn
+  role_arn = "arn:aws:iam::120569638976:role/StepFunctionExecutionRole"
 
   definition = jsonencode({
     Comment = "The state machines of the pdf processing"
