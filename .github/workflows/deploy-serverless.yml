@@ -72,6 +72,18 @@ jobs:
       - name: Terraform Init
         run: terraform init
 
+      - name: Import Step Function if exists
+        run: |
+          STATE_MACHINE_NAME="IngestorStateMachine"
+          STATE_MACHINE_ARN=$(aws stepfunctions list-state-machines --query "stateMachines[?name=='$STATE_MACHINE_NAME'].stateMachineArn" --output text)
+          TF_RESOURCE="aws_sfn_state_machine.state_machine"
+          if [ -z "$STATE_MACHINE_ARN" ]; then
+            echo "State machine $STATE_MACHINE_NAME does not exist, skipping import."
+          else
+            echo "Importing state machine: $STATE_MACHINE_ARN"
+            terraform import $TF_RESOURCE $STATE_MACHINE_ARN || true
+          fi
+
       - name: Terraform Plan
         run: terraform plan
 
