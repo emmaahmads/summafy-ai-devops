@@ -5,17 +5,25 @@ Parameters:
   DocBucketName:
     Type: String
     Description: "The S3 bucket name that the Lambda can access"
+  ZipBucketName:
+    Type: String
+    Description: "The S3 bucket name that the Lambda zip file is stored in"
 
 Resources:
+
   SummafyReadS3ContainerFunction:
     Type: AWS::Serverless::Function
     Properties:
-      PackageType: Image
-      ImageUri: 120569638976.dkr.ecr.us-east-1.amazonaws.com/summafy-repo@sha256:5ed783c6239d066c7d445b80e34b61c4e30543944ecd9ab0c2b9ccac82519b9f #todo
+      PackageType: Zip
+      CodeUri:
+        Bucket: !Ref ZipBucketName
+        Key: lambda-ingestor.zip
+      Runtime: python3.9
+      Handler: app.lambda_handler
       MemorySize: 512
       Timeout: 30
-      Architectures:
-        - x86_64
+      Layers:
+        - arn:aws:lambda:us-east-1:901920570463:layer:aws-otel-python-amd64-ver-1-21-0:1
       Policies:
         - S3ReadPolicy:
             BucketName: !Ref DocBucketName

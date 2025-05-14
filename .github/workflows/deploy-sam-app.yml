@@ -37,6 +37,7 @@ jobs:
           AWS_REGION: ${{ secrets.AWS_REGION }}
           DOC_BUCKET_NAME: ${{ secrets.DOC_BUCKET_NAME }}
           ARTIFACT_BUCKET_NAME: ${{ secrets.ARTIFACT_BUCKET_NAME }}
+          ZIP_BUCKET_NAME: ${{ secrets.ZIP_BUCKET_NAME }}
         run: |
           sam build
           sam deploy \
@@ -47,5 +48,4 @@ jobs:
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --resolve-image-repos \
-            --parameter-overrides DocBucketName=${DOC_BUCKET_NAME}
-
+            --parameter-overrides DocBucketName=${DOC_BUCKET_NAME} ZipBucketName=${ZIP_BUCKET_NAME}
