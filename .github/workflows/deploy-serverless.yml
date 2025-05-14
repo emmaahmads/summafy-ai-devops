@@ -35,10 +35,14 @@ jobs:
         working-directory: sam
         env:
           AWS_REGION: ${{ secrets.AWS_REGION }}
+          ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
           DOC_BUCKET_NAME: ${{ secrets.DOC_BUCKET_NAME }}
           ZIP_BUCKET_NAME: ${{ secrets.ZIP_BUCKET_NAME }}
+          INGESTOR_FUNCTION_ARN: arn:aws:lambda:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:function:summafy-ingestor
         run: |
+          echo "Building SAM application..."
           sam build
+          echo "Deploying SAM application..."
           sam deploy \
             --stack-name summafy-lambdas \
             --region $AWS_REGION \
@@ -46,6 +50,20 @@ jobs:
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --parameter-overrides DocBucketName=${DOC_BUCKET_NAME} ZipBucketName=${ZIP_BUCKET_NAME}
+          
+          echo "Configuring S3 notification..."
+          aws s3api put-bucket-notification-configuration \
+            --bucket "${DOC_BUCKET_NAME}" \
+            --notification-configuration "{\"LambdaFunctionConfigurations\":[{\"LambdaFunctionArn\":\"${INGESTOR_FUNCTION_ARN}\",\"Events\":[\"s3:ObjectCreated:*\"]}]}"
+
+          echo "Adding permission to Lambda function..."
+          aws lambda add-permission \
+            --function-name summafy-ingestor \
+            --principal s3.amazonaws.com \
+            --statement-id s3invoke \
+            --action "lambda:InvokeFunction" \
+            --source-arn arn:aws:s3:::${DOC_BUCKET_NAME} \
+            --source-account ${ACCOUNT_ID}
 
   terraform:
     name: 'Terraform Apply'
