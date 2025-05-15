@@ -37,6 +37,9 @@ jobs:
           role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
           aws-region: ${{ secrets.AWS_REGION }}
 
+      - name: Confirm Identity
+        run: aws sts get-caller-identity
+
       - name: Deploy SAM application
         working-directory: sam
         env:
@@ -82,6 +85,7 @@ jobs:
           INGESTOR_FUNCTION_ARN: arn:aws:lambda:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:function:summafy-ingestor
         run: |
           echo "Configuring S3 notification..."
+          export AWS_DEBUG=true
           aws s3api put-bucket-notification-configuration \
             --bucket "superumi-summafy-123" \
             --notification-configuration "{\"LambdaFunctionConfigurations\":[{\"LambdaFunctionArn\":\"arn:aws:lambda:us-east-1:120569638976:function:summafy-ingestor\",\"Events\":[\"s3:ObjectCreated:*\"]}]}"
