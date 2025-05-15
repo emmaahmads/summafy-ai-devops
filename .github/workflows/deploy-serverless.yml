@@ -42,7 +42,6 @@ jobs:
         run: |
           echo "Building SAM application..."
           sam build
-          
           echo "Deploying SAM application..."
           sam deploy \
             --stack-name summafy-lambdas \
@@ -56,6 +55,15 @@ jobs:
           aws s3api put-bucket-notification-configuration \
             --bucket "${DOC_BUCKET_NAME}" \
             --notification-configuration "{\"LambdaFunctionConfigurations\":[{\"LambdaFunctionArn\":\"${INGESTOR_FUNCTION_ARN}\",\"Events\":[\"s3:ObjectCreated:*\"]}]}"
+
+          echo "Adding permission to Lambda function..."
+          aws lambda add-permission \
+            --function-name summafy-ingestor \
+            --principal s3.amazonaws.com \
+            --statement-id s3invoke \
+            --action "lambda:InvokeFunction" \
+            --source-arn arn:aws:s3:::${DOC_BUCKET_NAME} \
+            --source-account ${ACCOUNT_ID}
 
   terraform:
     name: 'Terraform Apply'
