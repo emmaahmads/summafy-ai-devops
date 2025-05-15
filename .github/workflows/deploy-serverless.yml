@@ -88,7 +88,9 @@ jobs:
           export AWS_DEBUG=true
           aws s3api put-bucket-notification-configuration \
             --bucket "superumi-summafy-123" \
-            --notification-configuration "{\"LambdaFunctionConfigurations\":[{\"LambdaFunctionArn\":\"arn:aws:lambda:us-east-1:120569638976:function:summafy-ingestor\",\"Events\":[\"s3:ObjectCreated:*\"]}]}"
+            --notification-configuration file://notification.json
+          aws s3api get-bucket-notification-configuration --bucket superumi-summafy-123
+
           # echo "Adding permission to Lambda function..."
           # aws lambda add-permission \
           #   --function-name "${INGESTOR_FUNCTION_ARN}" \
