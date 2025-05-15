@@ -51,11 +51,6 @@ jobs:
             --no-fail-on-empty-changeset \
             --parameter-overrides DocBucketName=${DOC_BUCKET_NAME} ZipBucketName=${ZIP_BUCKET_NAME}
           
-          echo "Configuring S3 notification..."
-          aws s3api put-bucket-notification-configuration \
-            --bucket "${DOC_BUCKET_NAME}" \
-            --notification-configuration "{\"LambdaFunctionConfigurations\":[{\"LambdaFunctionArn\":\"${INGESTOR_FUNCTION_ARN}\",\"Events\":[\"s3:ObjectCreated:*\"]}]}"
-
           echo "Adding permission to Lambda function..."
           aws lambda add-permission \
             --function-name summafy-ingestor \
@@ -64,6 +59,11 @@ jobs:
             --action "lambda:InvokeFunction" \
             --source-arn arn:aws:s3:::${DOC_BUCKET_NAME} \
             --source-account ${ACCOUNT_ID}
+            
+          echo "Configuring S3 notification..."
+          aws s3api put-bucket-notification-configuration \
+            --bucket "${DOC_BUCKET_NAME}" \
+            --notification-configuration "{\"LambdaFunctionConfigurations\":[{\"LambdaFunctionArn\":\"${INGESTOR_FUNCTION_ARN}\",\"Events\":[\"s3:ObjectCreated:*\"]}]}"
 
   terraform:
     name: 'Terraform Apply'
