@@ -25,6 +25,11 @@ jobs:
       - name: Install AWS SAM CLI
         uses: aws-actions/setup-sam@v2
 
+      - name: Install AWS CLI
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y awscli
+
       - name: Configure AWS credentials via OIDC
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -50,16 +55,15 @@ jobs:
             --no-confirm-changeset \
             --no-fail-on-empty-changeset \
             --parameter-overrides DocBucketName=${DOC_BUCKET_NAME} ZipBucketName=${ZIP_BUCKET_NAME}
-          
+        
           echo "Adding permission to Lambda function..."
           aws lambda add-permission \
             --function-name summafy-ingestor \
             --principal s3.amazonaws.com \
             --statement-id s3invoke \
             --action "lambda:InvokeFunction" \
-            --source-arn arn:aws:s3:::${DOC_BUCKET_NAME} \
-            --source-account ${ACCOUNT_ID}
-            
+            --source-arn arn:aws:s3:::${DOC_BUCKET_NAME}
+
           echo "Configuring S3 notification..."
           aws s3api put-bucket-notification-configuration \
             --bucket "${DOC_BUCKET_NAME}" \
