@@ -73,6 +73,14 @@ jobs:
             --action "lambda:InvokeFunction" \
             --source-arn "arn:aws:s3:::superumi-summafy-123"
 
+      - name: Configure S3 notification
+        working-directory: sam
+        env: 
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          DOC_BUCKET_NAME: ${{ secrets.DOC_BUCKET_NAME }}
+          INGESTOR_FUNCTION_ARN: arn:aws:lambda:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:function:summafy-ingestor
+        run: |
           echo "Configuring S3 notification..."
           aws s3api put-bucket-notification-configuration \
             --bucket "superumi-summafy-123" \
