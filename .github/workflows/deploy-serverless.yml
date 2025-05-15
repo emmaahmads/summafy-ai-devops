@@ -60,50 +60,6 @@ jobs:
             --no-fail-on-empty-changeset \
             --parameter-overrides DocBucketName=${DOC_BUCKET_NAME} ZipBucketName=${ZIP_BUCKET_NAME}
         
-      - name: Add permission to Lambda function
-        working-directory: sam
-        env:
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          DOC_BUCKET_NAME: ${{ secrets.DOC_BUCKET_NAME }}
-          INGESTOR_FUNCTION_ARN: arn:aws:lambda:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:function:summafy-ingestor
-        run: |
-         echo "Adding permission to Lambda function..."
-          aws lambda add-permission \
-            --function-name summafy-ingestor \
-            --principal s3.amazonaws.com \
-            --statement-id s3invoke \
-            --action "lambda:InvokeFunction" \
-            --source-arn "arn:aws:s3:::superumi-summafy-123"
-
-      - name: Configure S3 notification
-        working-directory: sam
-        env: 
-          AWS_REGION: ${{ secrets.AWS_REGION }}
-          ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
-          DOC_BUCKET_NAME: ${{ secrets.DOC_BUCKET_NAME }}
-          INGESTOR_FUNCTION_ARN: arn:aws:lambda:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:function:summafy-ingestor
-        run: |
-          echo "Configuring S3 notification..."
-          export AWS_DEBUG=true
-          aws s3api put-bucket-notification-configuration \
-            --bucket "superumi-summafy-123" \
-            --notification-configuration file://notification.json
-          aws s3api get-bucket-notification-configuration --bucket superumi-summafy-123
-
-          # echo "Adding permission to Lambda function..."
-          # aws lambda add-permission \
-          #   --function-name "${INGESTOR_FUNCTION_ARN}" \
-          #   --principal s3.amazonaws.com \
-          #   --statement-id s3invoke \
-          #   --action "lambda:InvokeFunction" \
-          #   --source-arn "arn:aws:s3:::${DOC_BUCKET_NAME}"
-
-          # echo "Configuring S3 notification..."
-          # aws s3api put-bucket-notification-configuration \
-          #   --bucket "${DOC_BUCKET_NAME}" \
-          #   --notification-configuration "{\"LambdaFunctionConfigurations\":[{\"LambdaFunctionArn\":\"${INGESTOR_FUNCTION_ARN}\",\"Events\":[\"s3:ObjectCreated:*\"]}]}"
-
   terraform:
     name: 'Terraform Apply'
     runs-on: ubuntu-latest
@@ -152,3 +108,47 @@ jobs:
             terraform destroy -auto-approve
             exit 1
           fi
+
+      - name: Add permission to Lambda function
+        working-directory: sam
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          DOC_BUCKET_NAME: ${{ secrets.DOC_BUCKET_NAME }}
+          INGESTOR_FUNCTION_ARN: arn:aws:lambda:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:function:summafy-ingestor
+        run: |
+          echo "Adding permission to Lambda function..."
+          aws lambda add-permission \
+            --function-name summafy-ingestor \
+            --principal s3.amazonaws.com \
+            --statement-id s3invoke \
+            --action "lambda:InvokeFunction" \
+            --source-arn "arn:aws:s3:::superumi-summafy-123"
+
+      - name: Configure S3 notification
+        working-directory: sam
+        env: 
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          DOC_BUCKET_NAME: ${{ secrets.DOC_BUCKET_NAME }}
+          INGESTOR_FUNCTION_ARN: arn:aws:lambda:${{ secrets.AWS_REGION }}:${{ secrets.AWS_ACCOUNT_ID }}:function:summafy-ingestor
+        run: |
+          cat <<EOF > notification.json
+          {
+          "LambdaFunctionConfigurations": [
+            {
+              "LambdaFunctionArn": "${INGESTOR_FUNCTION_ARN}",
+              "Events": [
+                "s3:ObjectCreated:*"
+              ]
+            }
+          ]
+          }
+          EOF
+          ls -l
+          echo "Configuring S3 notification..."
+          export AWS_DEBUG=true
+          aws s3api put-bucket-notification-configuration \
+            --bucket "superumi-summafy-123" \
+            --notification-configuration file://notification.json
+          aws s3api get-bucket-notification-configuration --bucket superumi-summafy-123
